@@ -339,9 +339,9 @@ public class SmtpLoop implements Runnable, TransportListener
         try
         {
             running = true;
-            while (true)
+            while (running)
             {
-                while (queue.size() > 0)
+                while (running && queue.size() > 0)
                 {
                     boolean failed = false;
                     MessageParams params = null;
@@ -362,7 +362,11 @@ public class SmtpLoop implements Runnable, TransportListener
                             catch (Exception e)
                             {
                                 logger.error("smtp: could not connect to transport", e);
-                                if (++tries > MAX_RETRIES) throw e;
+                                if (++tries > MAX_RETRIES)
+                                {
+                                    running = false;
+                                    throw e;
+                                }
                                 Thread.sleep(5000);
                             }
                         }
