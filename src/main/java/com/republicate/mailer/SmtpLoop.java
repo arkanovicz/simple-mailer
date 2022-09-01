@@ -335,6 +335,7 @@ public class SmtpLoop implements Runnable, TransportListener
       
     public void run()
     {
+        logger.debug("starting send loop");
         try
         {
             running = true;
@@ -351,6 +352,7 @@ public class SmtpLoop implements Runnable, TransportListener
                         message = generateMessage(params);
                         while (!transport.isConnected())
                         {
+                            int tries = 0;
                             try
                             {
                                 logger.debug("smtp: connecting to transport");
@@ -360,6 +362,7 @@ public class SmtpLoop implements Runnable, TransportListener
                             catch (Exception e)
                             {
                                 logger.error("smtp: could not connect to transport", e);
+                                if (++tries > MAX_RETRIES) throw e;
                                 Thread.sleep(5000);
                             }
                         }

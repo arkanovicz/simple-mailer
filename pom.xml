@@ -26,21 +26,21 @@ under the License.
     </parent>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
     <name>Simple Mailer</name>
     <description>Simple Mailer</description>
     <url>https://github.com/arkanovicz/simple-mailer</url>
     <licenses>
         <license>
-            <name>Apache Licence</name>
+            <name>Apache Licence 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
     <scm>
         <connection>scm:git:git@github.com:arkanovicz/simple-mailer.git</connection>
         <developerConnection>scm:git:git@github.com:arkanovicz/simple-mailer.git</developerConnection>
-        <url>http://arkanovicz.github.io/simple-mailer/</url>
+        <url>https://arkanovicz.github.io/simple-mailer/</url>
     </scm>
     <developers>
         <developer>
@@ -79,64 +79,108 @@ under the License.
             <version>1.12.2</version>
         </dependency>    </dependencies>
     <distributionManagement>
-	    <snapshotRepository>
-		    <id>ossrh</id>
-		    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-	    </snapshotRepository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
     </distributionManagement>
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-bytecode-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[1.8,)</version>
+                                </requireJavaVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>ban-known-bad-maven-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.0.5,)</version>
+                                    <message>Maven minimal expected version is 3.0.5.</message>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>extra-enforcer-rules</artifactId>
+                        <version>1.2</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- building -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.10.1</version>
                 <configuration>
                     <showDeprecation>true</showDeprecation>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
-		    <plugin>
-			    <groupId>org.sonatype.plugins</groupId>
-			    <artifactId>nexus-staging-maven-plugin</artifactId>
-			    <version>1.6.5</version>
-			    <extensions>true</extensions>
-			    <configuration>
-				    <serverId>ossrh</serverId>
-				    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-				    <autoReleaseAfterClose>false</autoReleaseAfterClose>
-			    </configuration>
-		    </plugin>
-		    <plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-source-plugin</artifactId>
-			    <version>2.4</version>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.12</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
                     <includePom>false</includePom>
                 </configuration>
-			    <executions>
-				    <execution>
-					    <id>attach-sources</id>
-					    <goals>
-						    <goal>jar-no-fork</goal>
-					    </goals>
-				    </execution>
-			    </executions>
-		    </plugin>
-		    <plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-javadoc-plugin</artifactId>
-			    <version>3.3.2</version>
-			    <executions>
-				    <execution>
-					    <id>attach-javadocs</id>
-					    <goals>
-						    <goal>jar</goal>
-					    </goals>
-				    </execution>
-			    </executions>
-		    </plugin>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>
