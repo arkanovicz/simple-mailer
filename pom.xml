@@ -73,10 +73,11 @@ under the License.
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
+        <!-- upgrade jsoup, which has a vulnerability in 1.12.2 version, used by commons-lang3 -->        
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.12.2</version>
+            <version>1.15.3</version>
         </dependency>    </dependencies>
     <distributionManagement>
         <snapshotRepository>
