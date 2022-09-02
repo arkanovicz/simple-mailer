@@ -26,7 +26,7 @@ under the License.
     </parent>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
     <name>Simple Mailer</name>
     <description>Simple Mailer</description>
@@ -55,7 +55,7 @@ under the License.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <slf4j.version>1.7.36</slf4j.version>
-        <jakarta.mail.version>1.6.5</jakarta.mail.version>
+        <jakarta.mail.version>2.1.0</jakarta.mail.version>
     </properties>
     <dependencies>
         <dependency>
@@ -64,8 +64,8 @@ under the License.
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
             <version>${jakarta.mail.version}</version>
         </dependency>
         <dependency>
