@@ -25,25 +25,25 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.activation.DataHandler;
-import jakarta.activation.DataSource;
-import jakarta.activation.FileDataSource;
-import jakarta.mail.Address;
-import jakarta.mail.Authenticator;
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.SendFailedException;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.BodyPart;
-import jakarta.mail.event.TransportEvent;
-import jakarta.mail.event.TransportListener;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.internet.MimeBodyPart;
-import jakarta.mail.util.ByteArrayDataSource;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.Address;
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.SendFailedException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.BodyPart;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -346,7 +346,6 @@ public class SmtpLoop implements Runnable, TransportListener
                     boolean failed = false;
                     MessageParams params = null;
                     Message message = null;
-                    int illegalStateTries = 0;
                     try
                     {
                         params = queue.removeFirst();
@@ -359,10 +358,11 @@ public class SmtpLoop implements Runnable, TransportListener
                                 logger.debug("smtp: connecting to transport");
                                 connectTransport();
                                 logger.debug("smtp: connected to transport");
+                                tries = 0;
                             }
                             catch (Exception e)
                             {
-                                logger.error("smtp: could not connect to transport", e);
+                                logger.warn("smtp: could not connect to transport", e);
                                 if (++tries > MAX_RETRIES)
                                 {
                                     running = false;
@@ -374,21 +374,12 @@ public class SmtpLoop implements Runnable, TransportListener
                         logger.debug("smtp: sending message "+params);
                         paramsMap.put(message, params);
                         transport.sendMessage(message, message.getAllRecipients());
+                        Thread.sleep(1000);
                     }
                     catch(SendFailedException SFe)
                     {
                         failed = true;
-                        logger.error("could not send message {}", params, SFe);
-                    }
-                    catch (IllegalStateException ise)
-                    {
-                        failed = true;
-                        logger.error("could not send message {}", params, ise);
-                        if (++illegalStateTries > MAX_RETRIES)
-                        {
-                            running = false;
-                            throw ise;
-                        }
+                        logger.warn("could not send message {}", params, SFe);
                     }
                     catch (InterruptedException ie)
                     {
@@ -399,7 +390,7 @@ public class SmtpLoop implements Runnable, TransportListener
                     catch(Throwable t)
                     {
                         failed = true;
-                        logger.error("could not send message ", params, t);
+                        logger.warn("could not send message ", params, t);
                     }
 
                     if (failed)
@@ -453,7 +444,7 @@ public class SmtpLoop implements Runnable, TransportListener
         }
         catch(Exception e)
         {
-            logger.error("unrecoverable error in smtp loop", e);
+            logger.warn("unrecoverable error in smtp loop", e);
         }
         finally
         {
