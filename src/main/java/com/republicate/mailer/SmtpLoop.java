@@ -346,13 +346,14 @@ public class SmtpLoop implements Runnable, TransportListener
                     boolean failed = false;
                     MessageParams params = null;
                     Message message = null;
+                    int illegalStateTries = 0;
                     try
                     {
                         params = queue.removeFirst();
                         message = generateMessage(params);
+                        int tries = 0;
                         while (!transport.isConnected())
                         {
-                            int tries = 0;
                             try
                             {
                                 logger.debug("smtp: connecting to transport");
@@ -378,6 +379,16 @@ public class SmtpLoop implements Runnable, TransportListener
                     {
                         failed = true;
                         logger.error("could not send message {}", params, SFe);
+                    }
+                    catch (IllegalStateException ise)
+                    {
+                        failed = true;
+                        logger.error("could not send message {}", params, ise);
+                        if (++illegalStateTries > MAX_RETRIES)
+                        {
+                            running = false;
+                            throw ise;
+                        }
                     }
                     catch (InterruptedException ie)
                     {
@@ -447,6 +458,7 @@ public class SmtpLoop implements Runnable, TransportListener
         finally
         {
             running = false;
+            logger.info("exiting");
         }
     }
 
