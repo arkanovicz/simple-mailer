@@ -151,7 +151,7 @@ public class SmtpLoop implements Runnable, TransportListener
         while(matcher.find())
         {
             url.add(matcher.group(1));
-            matcher.appendReplacement(buffer, "<img src=\"cid:image_"+index+"@internetgoschool.com\"/>");
+            matcher.appendReplacement(buffer, "<img src=\"cid:image_"+index+"\"/>");
             ++index;
         }
         matcher.appendTail(buffer);
@@ -234,11 +234,11 @@ public class SmtpLoop implements Runnable, TransportListener
                     if(url.startsWith("ftp://")) url = url.replaceFirst("^ftp","https");
                     // do not rewrite protocols: they should already be ok
                     // else if (url.startsWith("http://")) url = url.replaceFirst("^http","https");
-                    else if(!url.startsWith("https"))
+                    else if(!url.contains("://"))
                     {
                         // ".." is not handled
                         if(!url.startsWith("/")) url = "/" + url;
-                        url = "https://internetgoschool.com" + url;
+                        url = "file://" + url;
                     }
                     InputStream input = new URL(url).openStream();
                     //String mime = URLConnection.guessContentTypeFromStream(input);
@@ -247,7 +247,7 @@ public class SmtpLoop implements Runnable, TransportListener
                     MimeBodyPart inlineImage = new MimeBodyPart();
                     inlineImage.setDataHandler(new DataHandler(source));
                     inlineImage.setFileName(url.substring(url.lastIndexOf(File.separator)+1));
-                    inlineImage.setContentID("<image_"+index+"@internetgoschool.com>");
+                    inlineImage.setContentID("<image_"+index+">");
                     related.addBodyPart(inlineImage);
                     ++index;
                 }
