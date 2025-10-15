@@ -80,7 +80,6 @@ public class SmtpLoop implements Runnable, TransportListener
         props = new Properties();
         props.put("mail.smtp.host", config.getProperty("smtp.host"));
         props.put("mail.smtp.auth", String.valueOf(doAuth));
-        //props.put("mail.smtp.port", Integer.parseInt(config.getProperty("smtp.port")));
         props.put("mail.smtp.port", config.getProperty("smtp.port"));
         if (logger.isDebugEnabled())
         {
@@ -90,12 +89,18 @@ public class SmtpLoop implements Runnable, TransportListener
                 logger.debug("  {} = {}", prop, props.getProperty(prop));
             }
         }
+        if ("465".equals(props.getProperty("mail.smtp.port"))) {
+            props.put("mail.smtp.ssl.enable", "true");
+            props.remove("mail.smtp.starttls.enable");
+        } else { // assume 587
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.starttls.required", "true");
+        }
         final String user = config.getProperty("smtp.user");
         final String password = config.getProperty("smtp.password");
         Authenticator auth = null;
         if (doAuth)
         {
-            props.put("mail.smtp.starttls.enable","true");
             auth = new Authenticator()
             {
                 @Override
@@ -106,6 +111,9 @@ public class SmtpLoop implements Runnable, TransportListener
             };
         }
         session = Session.getInstance(props, auth);
+        if (config.containsKey("smtp.debug") && "true".equals(config.getProperty("smtp.debug"))) {
+            session.setDebug(true);
+        }
     }
 
     private int addMail(MessageParams params)
