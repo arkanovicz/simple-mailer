@@ -21,7 +21,7 @@ public class MessageParams
         this.from = from;
         this.to = to;
         this.cc = cc;
-        this.bcc = body;
+        this.bcc = bcc;
         this.replyTo = replyTo;
         this.subject = subject;
         this.body = body;
