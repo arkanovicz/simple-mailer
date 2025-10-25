@@ -182,6 +182,16 @@ public class SmtpLoop implements Runnable, TransportListener
         {
             message.addRecipient(Message.RecipientType.TO,d);
         }
+        InternetAddress ccdest[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.cc));
+        for(InternetAddress d:ccdest)
+        {
+            message.addRecipient(Message.RecipientType.CC,d);
+        }
+        InternetAddress bccdest[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.bcc));
+        for(InternetAddress d:bccdest)
+        {
+            message.addRecipient(Message.RecipientType.BCC,d);
+        }
         InternetAddress replyTo[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.replyTo));
         message.setReplyTo(replyTo);
 
