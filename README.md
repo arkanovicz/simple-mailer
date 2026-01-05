@@ -29,7 +29,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 - File and URL attachments
 - Automatic inline image embedding for HTML emails
 - HTML-to-plain-text conversion for multipart alternatives
-- SSL/TLS support with optional hostname override (proxy/tunnel scenarios)
+- SSL/TLS support with optional hostname verification bypass (proxy/tunnel scenarios)
 - Automatic retry mechanism (up to 3 attempts, 1-hour delay between retries)
 - Optional delivery status callbacks
 
@@ -41,7 +41,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 <dependency>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>2.4</version>
+    <version>2.5</version>
 </dependency>
 ```
 
@@ -79,7 +79,7 @@ SMTP configuration is passed as a `Properties` object to the `SmtpLoop` construc
 | `smtp.port` | Yes | SMTP port (465 for SSL, 587 for STARTTLS) |
 | `smtp.user` | No | SMTP authentication username |
 | `smtp.password` | No | SMTP authentication password |
-| `smtp.ssl.host` | No | Override SSL certificate hostname (useful for proxies/tunnels) |
+| `smtp.sslCheck` | No | SSL hostname verification (`true` default, `false` for proxies/tunnels) |
 | `smtp.debug` | No | Enable debug logging (`true`/`false`) |
 | `webapp.env` | No | If set to `prod`, forces authentication |
 
@@ -88,15 +88,17 @@ SMTP configuration is passed as a `Properties` object to the `SmtpLoop` construc
 - **Port 465**: Uses implicit SSL (`mail.smtp.ssl.enable=true`)
 - **Port 587**: Uses STARTTLS (`mail.smtp.starttls.enable=true`, `mail.smtp.starttls.required=true`)
 
-### SSL Hostname Override
+### Disabling SSL Hostname Verification
 
-When using SMTP through a proxy or tunnel, the server certificate may not match the connection hostname. Use `smtp.ssl.host` to specify the expected certificate hostname:
+When using SMTP through a proxy or SSH tunnel, the server certificate won't match the connection hostname. Use `smtp.sslCheck=false` to disable hostname verification:
 
 ```java
-config.put("smtp.host", "localhost");          // Connection goes through tunnel
-config.put("smtp.port", "587");
-config.put("smtp.ssl.host", "smtp.gmail.com"); // Expected certificate hostname
+config.put("smtp.host", "172.17.0.1");    // Connection through tunnel
+config.put("smtp.port", "58700");
+config.put("smtp.sslCheck", "false");     // Disable hostname verification
 ```
+
+**Note:** Only disable this in controlled environments (local tunnels, trusted proxies). For production, ensure the certificate matches the connection hostname.
 
 ## Usage Examples
 

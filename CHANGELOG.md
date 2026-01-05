@@ -2,10 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.5] - 2026-01-05
+
+### Added
+- `smtp.sslCheck` configuration property to control SSL hostname verification (default `true`, set to `false` for proxies/tunnels)
+
 ## [2.4] - 2026-01-05
 
 ### Added
-- `smtp.ssl.host` configuration property to override SSL certificate hostname verification (useful for proxies and tunnels)
+
+- Full documentation in README.md
+- CHANGELOG.md
 
 ## [2.3] - 2025
 

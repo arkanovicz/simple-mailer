@@ -96,10 +96,9 @@ public class SmtpLoop implements Runnable, TransportListener
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.starttls.required", "true");
         }
-        // Allow overriding SSL hostname for certificate verification (useful for tunnels/proxies)
-        if (config.containsKey("smtp.ssl.host")) {
-            props.put("mail.smtp.ssl.host", config.getProperty("smtp.ssl.host"));
-        }
+        // SSL hostname verification (default true, set to false for tunnels/proxies)
+        String sslCheck = config.getProperty("smtp.sslCheck", "true");
+        props.put("mail.smtp.ssl.checkserveridentity", sslCheck);
         final String user = config.getProperty("smtp.user");
         final String password = config.getProperty("smtp.password");
         Authenticator auth = null;
