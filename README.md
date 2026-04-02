@@ -41,7 +41,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 <dependency>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>2.5</version>
+    <version>2.6</version>
 </dependency>
 ```
 
@@ -174,6 +174,29 @@ EmailSender.send(
 );
 ```
 
+### HTML Email with Inline Images
+
+Provide a map of image source references to local files. The keys must match the `src` attributes used in your HTML:
+
+```java
+Map<String, File> images = new HashMap<>();
+images.put("logo.png", new File("/path/to/logo.png"));
+images.put("banner.jpg", new File("/path/to/banner.jpg"));
+
+EmailSender.send(
+    "from@example.com",
+    "to@example.com",
+    null, null,
+    "from@example.com",
+    "Newsletter",
+    "<html><body><img src=\"logo.png\"/><img src=\"banner.jpg\"/></body></html>",
+    "html",
+    images
+);
+```
+
+Images referenced in the HTML that match a key in the map are embedded from the local file; other `<img>` sources are fetched from their URL as before.
+
 ### Multiple Recipients
 
 Comma-separated addresses are supported:
@@ -235,6 +258,8 @@ send(from, to, replyTo, subject, body, type, attachmentList, callbackData)
 send(from, to, cc, bcc, replyTo, subject, body)
 send(from, to, cc, bcc, replyTo, subject, body, type)
 send(from, to, cc, bcc, replyTo, subject, body, type, attachmentList, callbackData)
+send(from, to, cc, bcc, replyTo, subject, body, type, inlineImages)
+send(from, to, cc, bcc, replyTo, subject, body, type, attachmentList, inlineImages, callbackData)
 ```
 
 **Parameters:**
@@ -247,6 +272,7 @@ send(from, to, cc, bcc, replyTo, subject, body, type, attachmentList, callbackDa
 - `body` - Email body content
 - `type` - Content type: `"text"`, `"html"`, or `"url"`
 - `attachmentList` - List of file paths or URLs
+- `inlineImages` - Map of image source references to local `File` objects
 - `callbackData` - Arbitrary data passed to completion callback
 
 ### SmtpLoop

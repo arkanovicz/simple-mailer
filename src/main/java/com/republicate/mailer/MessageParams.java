@@ -1,6 +1,8 @@
 package com.republicate.mailer;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public class MessageParams
 {
@@ -13,10 +15,16 @@ public class MessageParams
     public String body = null;
     public String type = null;
     public List<String> attachments = null;
+    public Map<String, File> inlineImages = null;
     public int nbTry;
     public Object callbackData = null;
-    
+
     public MessageParams (String from, String to, String cc, String bcc, String replyTo, String subject, String body, String type, List<String> attachments, Object callbackData)
+    {
+        this(from, to, cc, bcc, replyTo, subject, body, type, attachments, null, callbackData);
+    }
+
+    public MessageParams (String from, String to, String cc, String bcc, String replyTo, String subject, String body, String type, List<String> attachments, Map<String, File> inlineImages, Object callbackData)
     {
         this.from = from;
         this.to = to;
@@ -27,6 +35,7 @@ public class MessageParams
         this.body = body;
         this.type = type;
         this.attachments = attachments;
+        this.inlineImages = inlineImages;
         this.callbackData = callbackData;
         this.nbTry = 0;
     }

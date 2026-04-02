@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.6] - 2026-04-02
+
+### Added
+- Inline images support via `Map<String, File>` parameter, allowing direct file-based image embedding in HTML emails
+
 ## [2.5] - 2026-01-05
 
 ### Added

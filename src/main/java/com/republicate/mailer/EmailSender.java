@@ -1,8 +1,10 @@
 package com.republicate.mailer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class EmailSender {
     public static void send(String from, String to, String subject, String body) throws IOException {
@@ -43,10 +45,18 @@ public class EmailSender {
     }
 
     public static void send(String from, String to, String cc, String bcc, String replyTo, String subject, String body, String type, List<String> attrlst, Object callbackData) throws IOException {
+        send(from, to, cc, bcc, replyTo, subject, body, type, attrlst, null, callbackData);
+    }
+
+    public static void send(String from, String to, String cc, String bcc, String replyTo, String subject, String body, String type, Map<String, File> inlineImages) throws IOException {
+        send(from, to, cc, bcc, replyTo, subject, body, type, null, inlineImages, null);
+    }
+
+    public static void send(String from, String to, String cc, String bcc, String replyTo, String subject, String body, String type, List<String> attrlst, Map<String, File> inlineImages, Object callbackData) throws IOException {
         if (!SmtpLoop.isRunning()) {
             throw new IOException("smtp loop is not running");
         }
-        MessageParams messageParams = new MessageParams(from, to, cc, bcc, replyTo, subject, body, type, attrlst, callbackData);
+        MessageParams messageParams = new MessageParams(from, to, cc, bcc, replyTo, subject, body, type, attrlst, inlineImages, callbackData);
         SmtpLoop.sendMessage(messageParams);
     }
 }

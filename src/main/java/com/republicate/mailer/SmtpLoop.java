@@ -254,23 +254,35 @@ public class SmtpLoop implements Runnable, TransportListener
                 int index = 0;
                 for(String url: imagesURL)
                 {
-                    // TODO CB - use parametrized protocol
-                    if(url.startsWith("ftp://")) url = url.replaceFirst("^ftp","https");
-                    // do not rewrite protocols: they should already be ok
-                    // else if (url.startsWith("http://")) url = url.replaceFirst("^http","https");
-                    else if(!url.contains("://"))
+                    InputStream input;
+                    String filename;
+                    if (params.inlineImages != null && params.inlineImages.containsKey(url))
                     {
-                        // ".." is not handled
-                        if(!url.startsWith("/")) url = "/" + url;
-                        url = "file://" + url;
+                        File file = params.inlineImages.get(url);
+                        input = new java.io.FileInputStream(file);
+                        filename = file.getName();
                     }
-                    InputStream input = new URL(url).openStream();
+                    else
+                    {
+                        // TODO CB - use parametrized protocol
+                        if(url.startsWith("ftp://")) url = url.replaceFirst("^ftp","https");
+                        // do not rewrite protocols: they should already be ok
+                        // else if (url.startsWith("http://")) url = url.replaceFirst("^http","https");
+                        else if(!url.contains("://"))
+                        {
+                            // ".." is not handled
+                            if(!url.startsWith("/")) url = "/" + url;
+                            url = "file://" + url;
+                        }
+                        input = new URL(url).openStream();
+                        filename = url.substring(url.lastIndexOf(File.separator)+1);
+                    }
                     //String mime = URLConnection.guessContentTypeFromStream(input);
-                    String mime = URLConnection.guessContentTypeFromName(url.substring(url.lastIndexOf(File.separator)+1));
+                    String mime = URLConnection.guessContentTypeFromName(filename);
                     DataSource source = new ByteArrayDataSource(input, mime);
                     MimeBodyPart inlineImage = new MimeBodyPart();
                     inlineImage.setDataHandler(new DataHandler(source));
-                    inlineImage.setFileName(url.substring(url.lastIndexOf(File.separator)+1));
+                    inlineImage.setFileName(filename);
                     inlineImage.setContentID("<image_"+index+">");
                     related.addBodyPart(inlineImage);
                     ++index;
