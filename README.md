@@ -42,7 +42,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 <dependency>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>2.7</version>
+    <version>2.6</version>
 </dependency>
 ```
 
