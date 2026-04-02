@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.7] - 2026-04-02
+
+### Added
+- BCC recipient batch splitting: messages with more BCC recipients than `smtp.batch.size` (default 50) are automatically split into multiple messages with a configurable delay (`smtp.batch.delay`, default 5s) between batches
+- Batch-aware delivery callbacks: a single callback fires when all batches complete (or immediately on first failure)
+
 ## [2.6] - 2026-04-02
 
 ### Added

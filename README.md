@@ -30,6 +30,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 - Automatic inline image embedding for HTML emails
 - HTML-to-plain-text conversion for multipart alternatives
 - SSL/TLS support with optional hostname verification bypass (proxy/tunnel scenarios)
+- Automatic BCC batch splitting with configurable size and inter-batch delay
 - Automatic retry mechanism (up to 3 attempts, 1-hour delay between retries)
 - Optional delivery status callbacks
 
@@ -41,7 +42,7 @@ A lightweight, asynchronous Java email sending library built on Jakarta Mail.
 <dependency>
     <groupId>com.republicate</groupId>
     <artifactId>simple-mailer</artifactId>
-    <version>2.6</version>
+    <version>2.7</version>
 </dependency>
 ```
 
@@ -80,6 +81,8 @@ SMTP configuration is passed as a `Properties` object to the `SmtpLoop` construc
 | `smtp.user` | No | SMTP authentication username |
 | `smtp.password` | No | SMTP authentication password |
 | `smtp.sslCheck` | No | SSL hostname verification (`true` default, `false` for proxies/tunnels) |
+| `smtp.batch.size` | No | Max BCC recipients per message (default `50`). Larger lists are split automatically |
+| `smtp.batch.delay` | No | Delay in ms between batches (default `5000`) |
 | `smtp.debug` | No | Enable debug logging (`true`/`false`) |
 | `webapp.env` | No | If set to `prod`, forces authentication |
 
@@ -241,6 +244,17 @@ EmailSender.send(
     "order-confirmation-123" // callback data
 );
 ```
+
+### BCC Batch Splitting
+
+When sending to many BCC recipients, the message is automatically split into batches to respect SMTP provider limits. No code changes needed — just configure:
+
+```java
+config.put("smtp.batch.size", "50");   // max BCC per message (default)
+config.put("smtp.batch.delay", "5000"); // 5s between batches (default)
+```
+
+TO and CC recipients are preserved intact on each batch. The delivery callback fires once when all batches complete, or immediately on first failure.
 
 ## API Reference
 

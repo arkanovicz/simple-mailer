@@ -16,6 +16,7 @@ public class MessageParams
     public String type = null;
     public List<String> attachments = null;
     public Map<String, File> inlineImages = null;
+    public long batchDelay = 0;
     public int nbTry;
     public Object callbackData = null;
 
@@ -42,7 +43,8 @@ public class MessageParams
     
     public String toString()
     {
-        return from + " -> "+(to.length()>50?to.substring(0,50)+"...":to)+" subject: '"+subject+"' ("+type+") "+(attachments != null && attachments.size() > 0 ?"with "+attachments.size()+" attachement(s)":"");
+        String dest = to != null ? to : bcc;
+        return from + " -> "+(dest != null && dest.length()>50?dest.substring(0,50)+"...":dest)+" subject: '"+subject+"' ("+type+") "+(attachments != null && attachments.size() > 0 ?"with "+attachments.size()+" attachement(s)":"");
     }
       
 }

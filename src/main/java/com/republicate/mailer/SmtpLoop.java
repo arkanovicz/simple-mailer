@@ -53,6 +53,8 @@ public class SmtpLoop implements Runnable, TransportListener
     protected static final long SLEEP_DELAY = 30000; // 30 seconds
     protected static final long RETRY_DELAY = 3600000;  // 1 hour
     protected static final int MAX_RETRIES = 3;
+    private static int batchSize = 50;
+    private static long batchDelay = 5000;
 
     protected static Logger logger = LoggerFactory.getLogger("smtp-loop");
     protected static HtmlToPlainText htmlToPlainText = new HtmlToPlainText();
@@ -117,6 +119,18 @@ public class SmtpLoop implements Runnable, TransportListener
         if (config.containsKey("smtp.debug") && "true".equals(config.getProperty("smtp.debug"))) {
             session.setDebug(true);
         }
+        batchSize = Integer.parseInt(config.getProperty("smtp.batch.size", "50"));
+        batchDelay = Long.parseLong(config.getProperty("smtp.batch.delay", "5000"));
+    }
+
+    static int getBatchSize()
+    {
+        return batchSize;
+    }
+
+    static long getBatchDelay()
+    {
+        return batchDelay;
     }
 
     private int addMail(MessageParams params)
@@ -180,10 +194,12 @@ public class SmtpLoop implements Runnable, TransportListener
         InternetAddress sender = new InternetAddress(StringEscapeUtils.unescapeHtml4(params.from));
         message.setFrom(sender);
         message.setSentDate(new Date());
-        InternetAddress dest[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.to));
-        for(InternetAddress d:dest)
-        {
-            message.addRecipient(Message.RecipientType.TO,d);
+        if (params.to != null) {
+            InternetAddress dest[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.to));
+            for(InternetAddress d:dest)
+            {
+                message.addRecipient(Message.RecipientType.TO,d);
+            }
         }
         if (params.cc != null) {
             InternetAddress ccdest[] = InternetAddress.parse(StringEscapeUtils.unescapeHtml4(params.cc));
@@ -410,7 +426,8 @@ public class SmtpLoop implements Runnable, TransportListener
                         logger.debug("smtp: sending message "+params);
                         paramsMap.put(message, params);
                         transport.sendMessage(message, message.getAllRecipients());
-                        Thread.sleep(1000);
+                        long delay = params.batchDelay > 0 ? params.batchDelay : 1000;
+                        Thread.sleep(delay);
                     }
                     catch(SendFailedException SFe)
                     {
@@ -441,10 +458,7 @@ public class SmtpLoop implements Runnable, TransportListener
                     else
                     {
                         logger.debug("sending in progress: {}", params);
-                        if (completionCallback != null)
-                        {
-                            completionCallback.deliveryCompleted(CompletionCallback.Status.DELIVERED, params.callbackData);
-                        }
+                        fireCallback(CompletionCallback.Status.DELIVERED, params.callbackData);
                         while (retry.size() > 0)
                         {
                             queue.addLast(retry.removeFirst());
@@ -533,6 +547,33 @@ public class SmtpLoop implements Runnable, TransportListener
         }
     }
 
+    private void fireCallback(CompletionCallback.Status status, Object callbackData)
+    {
+        if (completionCallback == null) return;
+        if (callbackData instanceof BatchCallbackData)
+        {
+            BatchCallbackData batch = (BatchCallbackData) callbackData;
+            if (status != CompletionCallback.Status.DELIVERED)
+            {
+                if (batch.failed.compareAndSet(false, true))
+                {
+                    completionCallback.deliveryCompleted(status, batch.originalData);
+                }
+            }
+            else
+            {
+                if (batch.remaining.decrementAndGet() == 0 && !batch.failed.get())
+                {
+                    completionCallback.deliveryCompleted(CompletionCallback.Status.DELIVERED, batch.originalData);
+                }
+            }
+        }
+        else
+        {
+            completionCallback.deliveryCompleted(status, callbackData);
+        }
+    }
+
     protected void cleanupMessage(Message message)
     {
         paramsMap.remove(message);
@@ -541,7 +582,7 @@ public class SmtpLoop implements Runnable, TransportListener
     protected void doCallBack(CompletionCallback.Status status, Message message)
     {
         MessageParams params = paramsMap.get(message);
-        if (completionCallback != null) completionCallback.deliveryCompleted(status, params.callbackData);
+        fireCallback(status, params.callbackData);
         cleanupMessage(message);
     }
 
