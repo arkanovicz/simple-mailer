@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [2.7] - 2026-06-13
+
+### Added
+- `smtp.starttls` configuration property (default `true`): set to `false` for plain, unencrypted SMTP — talks to local dev sinks (GreenMail) and plain relays
+
+### Fixed
+- A transient connection failure no longer kills the send loop: after exhausting connect retries the message is re-queued and the loop backs off and resumes, instead of dying (which also previously lost the in-flight message)
+
 ## [2.6] - 2026-04-02
 
 ### Added

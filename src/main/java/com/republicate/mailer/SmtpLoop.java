@@ -94,10 +94,11 @@ public class SmtpLoop implements Runnable, TransportListener
         if ("465".equals(props.getProperty("mail.smtp.port"))) {
             props.put("mail.smtp.ssl.enable", "true");
             props.remove("mail.smtp.starttls.enable");
-        } else { // assume 587
+        } else if (!"false".equals(config.getProperty("smtp.starttls", "true"))) { // assume 587
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.starttls.required", "true");
         }
+        // else: plain mode, no encryption (local dev sink, plain relay)
         // SSL hostname verification (default true, set to false for tunnels/proxies)
         String sslCheck = config.getProperty("smtp.sslCheck", "true");
         props.put("mail.smtp.ssl.checkserveridentity", sslCheck);
@@ -417,7 +418,8 @@ public class SmtpLoop implements Runnable, TransportListener
                                 logger.warn("smtp: could not connect to transport", e);
                                 if (++tries > MAX_RETRIES)
                                 {
-                                    running = false;
+                                    // give up on this connect attempt, but keep the loop alive:
+                                    // the throw re-queues the message for retry and we back off via wait()
                                     throw e;
                                 }
                                 Thread.sleep(5000);

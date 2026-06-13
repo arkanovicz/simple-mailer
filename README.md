@@ -80,6 +80,7 @@ SMTP configuration is passed as a `Properties` object to the `SmtpLoop` construc
 | `smtp.port` | Yes | SMTP port (465 for SSL, 587 for STARTTLS) |
 | `smtp.user` | No | SMTP authentication username |
 | `smtp.password` | No | SMTP authentication password |
+| `smtp.starttls` | No | STARTTLS upgrade (`true` default). Set `false` for plain, unencrypted SMTP (local dev sinks, plain relays) |
 | `smtp.sslCheck` | No | SSL hostname verification (`true` default, `false` for proxies/tunnels) |
 | `smtp.batch.size` | No | Max BCC recipients per message (default `50`). Larger lists are split automatically |
 | `smtp.batch.delay` | No | Delay in ms between batches (default `5000`) |
@@ -89,7 +90,8 @@ SMTP configuration is passed as a `Properties` object to the `SmtpLoop` construc
 ### SSL/TLS Behavior
 
 - **Port 465**: Uses implicit SSL (`mail.smtp.ssl.enable=true`)
-- **Port 587**: Uses STARTTLS (`mail.smtp.starttls.enable=true`, `mail.smtp.starttls.required=true`)
+- **Port 587** (or any non-465 port): Uses STARTTLS (`mail.smtp.starttls.enable=true`, `mail.smtp.starttls.required=true`)
+- **`smtp.starttls=false`**: Plain, unencrypted SMTP — no SSL, no STARTTLS. For local dev sinks (e.g. GreenMail on `localhost:3025`) and plain relays. Port 465 still implies SSL regardless.
 
 ### Disabling SSL Hostname Verification
 
